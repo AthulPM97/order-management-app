@@ -1,8 +1,8 @@
 import { useOrders } from "@/store/OrdersContext";
 import React, { useState } from "react";
 
-const OrderTable = ({ orders }) => {
-  const [loading, setLoading] = useState(false);
+const OrderTable = ({ orders, handleOpenModal }) => {
+  const [loadingId, setLoadingId] = useState(null); // Track the ID of the order being deleted
   const { deleteOrder, editOrder } = useOrders();
   return (
     <table className="w-full border-collapse my-5">
@@ -29,19 +29,22 @@ const OrderTable = ({ orders }) => {
             <td className="border p-2 text-left">
               <button
                 className="px-3 py-1 m-1 cursor-pointer border rounded hover:bg-gray-600"
-                onClick={() => editOrder(order)}
+                onClick={() => {
+                  editOrder(order);
+                  handleOpenModal();
+                }}
               >
                 Edit
               </button>
               <button
                 className="px-3 py-1 m-1 cursor-pointer border rounded hover:bg-gray-600"
                 onClick={() => {
-                  setLoading(true);
+                  setLoadingId(order.id);
                   deleteOrder(order.id);
                 }}
-                disabled={loading}
+                disabled={loadingId === order.id}
               >
-                Delete
+                {loadingId === order.id ? "Wait..." : "Delete"}
               </button>
             </td>
           </tr>

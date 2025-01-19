@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { useProducts } from "@/store/ProductsContext";
 import { useOrders } from "@/store/OrdersContext";
 
-export default function OrderForm() {
+export default function OrderForm({ handleCloseModal }) {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [orderDescription, setOrderDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const { products } = useProducts();
   const { addOrder, updateOrder, editOrder, editingOrder } = useOrders();
@@ -33,6 +34,7 @@ export default function OrderForm() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const orderData = {
       orderDescription,
@@ -51,18 +53,43 @@ export default function OrderForm() {
       // Reset the form
       setOrderDescription("");
       setSelectedProducts([]);
+      setIsLoading(false);
+      handleCloseModal();
     } catch (error) {
       console.error("Error submitting order:", error);
+      handleCloseModal();
       alert("Failed to submit the order.");
     }
   };
 
   return (
     <div className="max-w-lg mx-auto border p-4 rounded shadow">
-      <h2 className="text-xl font-bold mb-4">
-        {" "}
-        {editingOrder ? "Edit Order" : "New Order"}
-      </h2>
+      <div className="flex justify-between">
+        <h2 className="text-xl font-bold mb-4 text-gray-800">
+          {" "}
+          {editingOrder ? "Edit Order" : "New Order"}
+        </h2>
+        {/* Cart Icon with Product Count */}
+        <div className="flex items-center space-x-2 text-gray-700">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 5.4M19 13l1.35 5.4M7 18h10"
+            />
+          </svg>
+          <span className="text-sm font-semibold">
+            {selectedProducts.length}
+          </span>
+        </div>
+      </div>
       <form onSubmit={handleSubmit}>
         {/* Order Description */}
         <input
@@ -70,7 +97,7 @@ export default function OrderForm() {
           placeholder="Order Description"
           value={orderDescription}
           onChange={(e) => setOrderDescription(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
+          className="w-full p-2 border rounded mb-4 text-gray-800"
           required
         />
 
@@ -108,6 +135,7 @@ export default function OrderForm() {
               editOrder(null);
               setOrderDescription("");
               setSelectedProducts([]);
+              handleCloseModal();
             }}
           >
             Cancel
@@ -115,8 +143,9 @@ export default function OrderForm() {
           <button
             type="submit"
             className="bg-gray-200 text-gray-700 px-4 py-2 rounded border border-gray-300"
+            disabled={isLoading}
           >
-            {editingOrder ? "Update" : "Submit"}
+            {isLoading ? "Loading..." : editingOrder ? "Update" : "Submit"}
           </button>
         </div>
       </form>
