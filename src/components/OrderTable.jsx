@@ -1,6 +1,9 @@
-import React from "react";
+import { useOrders } from "@/store/OrdersContext";
+import React, { useState } from "react";
 
-const OrderTable = ({ orders, onDelete }) => {
+const OrderTable = ({ orders }) => {
+  const [loading, setLoading] = useState(false);
+  const { deleteOrder, editOrder } = useOrders();
   return (
     <table className="w-full border-collapse my-5">
       <thead>
@@ -26,7 +29,17 @@ const OrderTable = ({ orders, onDelete }) => {
             <td className="border p-2 text-left">
               <button
                 className="px-3 py-1 m-1 cursor-pointer border rounded hover:bg-gray-600"
-                onClick={() => onDelete(order.id)}
+                onClick={() => editOrder(order)}
+              >
+                Edit
+              </button>
+              <button
+                className="px-3 py-1 m-1 cursor-pointer border rounded hover:bg-gray-600"
+                onClick={() => {
+                  setLoading(true);
+                  deleteOrder(order.id);
+                }}
+                disabled={loading}
               >
                 Delete
               </button>

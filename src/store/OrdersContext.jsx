@@ -5,6 +5,7 @@ const OrdersContext = createContext();
 
 export const OrdersProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
+  const [editingOrder, setEditingOrder] = useState(null); // Keep track of the order being edited
 
   useEffect(() => {
     fetch("/api/orders")
@@ -33,9 +34,38 @@ export const OrdersProvider = ({ children }) => {
     }
   };
 
+  const deleteOrder = async (orderId) => {
+    try {
+      await fetch(`/api/orders/${orderId}`, { method: "DELETE" });
+      setOrders((prev) => prev.filter((o) => o.id !== orderId));
+    } catch (error) {
+      console.error("Failed to delete order:", error);
+    }
+  };
+
+  const updateOrder = async (orderId, updatedOrder) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedOrder),
+      });
+      const data = await res.json();
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? data : o)));
+    } catch (error) {
+      console.error("Failed to update order:", error);
+    }
+  };
+
+  const editOrder = (order) => setEditingOrder(order); // Set the editing order
+
   const ordersCtx = {
     orders,
     addOrder,
+    deleteOrder,
+    editOrder,
+    editingOrder,
+    updateOrder,
   };
 
   return (
